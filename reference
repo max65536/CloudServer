@@ -1,0 +1,24 @@
+### Server
+'''python
+@post('/api/upload/image')
+async def store_pic(request):
+    # 如果是个很大的文件不要用这种方法。
+    logging.info('upload image....................................')
+    # logging.info(request.__data__)
+    if request.__data__ is None:
+        return None
+    file=request.__data__['files[]']
+    if file is None:
+        return None
+    filename=file.filename
+    file_content=file.file
+    path='../blog_data/temp/%s'%filename
+    new_file=open(path,'wb')
+    for line in file_content:
+        new_file.write(line)
+    new_file.close()
+    return {
+        'path':path
+}
+
+
