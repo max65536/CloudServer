@@ -1,0 +1,37 @@
+Database Structure
+
+table User
+--------------------
+id
+username
+password
+group
+filenum
+rootpath
+device
+filelist
+create_time
+---------------------
+
+table File
+---------------------
+id
+Filename
+size
+path
+checksum
+owner
+group
+create_time
+last_modified_time
+---------------------
+
+table Group
+---------------------
+id
+groupname
+groupsize
+captain
+members
+rootpath
+---------------------
