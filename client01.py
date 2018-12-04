@@ -1,7 +1,8 @@
-from md5_check import md5_check
-import os
-file_dir = os.getcwd()# + '/shared_files'
-print(file_dir)
-md5_check(file_dir)
+from check_timer import check_timer
+import threading
+
+
+timer = threading.Timer(1, check_timer)
+timer.start()
 
 
