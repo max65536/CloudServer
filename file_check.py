@@ -2,19 +2,51 @@ from upload_file import upload_file
 import requests
 
 
-def file_check(last_md5, current_md5, current_file_list, file_dir):
+def file_content_check(last_md5_file_content, current_md5_file_content):
+    update_list = []
+    print('length is %d' % len(current_md5_file_content))
+    num = 0
+    while(num < len(current_md5_file_content)):
+        if current_md5_file_content[num] != last_md5_file_content[num]:
+            update_list.append(num)
+        num = num + 1
+    return update_list
+
+
+def file_check(last_md5_file_content, current_md5_file_content, last_md5, current_md5, current_file_list, file_dir):
+
+    upload_list = []
+    last_md5_file_content.pop()
+    print('last list is %s' % last_md5_file_content)
+    print('current list is %s' % current_md5_file_content)
+
     if last_md5 == current_md5:
-        print('both md5 are same\r\n\r\n')
+        update_list = file_content_check(last_md5_file_content, current_md5_file_content)
+        print('update list is %s' % update_list) #[2]
+        print('update list is %d' % len(upload_list)) #0
+        num = 0
+        while (num < len(update_list)):
+            upload_list.append(current_file_list[update_list[num]])
+            print('current update is %s' % current_file_list[update_list[num]])
+            num = num + 1
+        upload_list.append('md5_client01_file_content.txt')
+        upload_file(upload_list)
+        print('upload files are %s\r\n\r\n' % upload_list)
+        print('both md5 are same')
     else:
         file_list_path = [file_dir + '/file_list.txt']
         with open(file_list_path[0], 'w') as f:
             for num in current_file_list:
                 print(num, file=f)
         last_file_list_t = requests.get("http://127.0.0.1:8000/download/file_list.txt")
-        upload_list = []
+
         if len(last_file_list_t.text) == 0:
             upload_list = current_file_list
             print('There is no such client before')
+            upload_list.append('md5_client01.txt')
+            upload_list.append('file_list.txt')
+            upload_list.append('md5_client01_file_content.txt')
+            upload_file(upload_list)
         else:
             current_num = 0
             last_num = 0
@@ -30,5 +62,13 @@ def file_check(last_md5, current_md5, current_file_list, file_dir):
                     last_num += 1
             upload_list.append('md5_client01.txt')
             upload_list.append('file_list.txt')
-        upload_file(upload_list)
-        print('upload files are %s\r\n\r\n' % upload_list)
+
+           # update_list = file_content_check(last_md5_file_content, current_md5_file_content)
+            #for num in range(len(upload_list)):
+            #    upload_list.append(current_file_list[update_list[num]])
+            upload_list.append('md5_client01_file_content.txt')
+            upload_file(upload_list)
+            print('upload files are %s\r\n\r\n' % upload_list)
+
+
+
