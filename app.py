@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp import web
-from handlers import store_file,download_file,api_register_user,api_login_user
+from handlers import store_file,download_file,api_register_user,api_login_user,login,register
 from datalink import create_pool
 
 
@@ -20,20 +20,24 @@ from datalink import create_pool
 #     return auth
 
 async def index(request):
-    name=request.match_info['name']
-    text='Hello,'+name
+    # name=request.match_info['name']
+    text='Hello,'+'world'
 
     return web.Response(text=text)
 
 async def init(loop):
     app=web.Application(loop=loop)
     app.router.add_route('GET','/',index)
-    app.router.add_route('GET','/{name}',index)
+    # app.router.add_route('GET','/{name}',index)
     app.router.add_route('POST','/upload',store_file)
     app.router.add_route('GET','/download',download_file)
+
+    app.router.add_route('GET','/login',login)
+    app.router.add_route('GET','/register',register)
     app.router.add_route('POST','/api/register',api_register_user)
-    app.router.add_route('POST','/login',api_login_user)
+    app.router.add_route('POST','/api/login',api_login_user)
     # app.router.add_route('GET','')
+    app.router.add_static('/static/','./static')
     await create_pool(loop=loop,host='localhost',port=3306,user='root',password='root',db='CloudServer')
     # srv=await loop.create_server(app.make_handler(),'127.0.0.1',8000)
     srv = await loop.create_server(app.make_handler(), '127.0.0.1', 8000)

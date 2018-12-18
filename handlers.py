@@ -3,7 +3,17 @@ import re,os
 from datalink import user_insert,find
 
 
-_RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
+async def login(request):
+    login_file=open('./templates/login.html',encoding='utf-8')
+    resp=web.Response(body=login_file.read().encode('utf-8'))
+    resp.headers['content-type']='text/html'
+    return resp
+
+async def register(request):
+    register_file=open('./templates/register.html',encoding='utf-8')
+    resp=web.Response(body=register_file.read().encode('utf-8'))
+    resp.headers['content-type']='text/html'
+    return resp
 
 async def store_file(request):
     # logging.info('upload image....................................')
@@ -45,14 +55,14 @@ async def api_register_user(request):
     # print(request.method)
     # print(request.body)
     # print(request.POST)
-    data=await request.post()
+    data=await request.json()
     print(data)
     username=data['name']
     passwd=data['passwd']
     print(username,':',passwd)
     rows=await user_insert(username=username,password=passwd)
     if rows>0:
-        r=web.Response(text='successfully registered')
+        r=web.json_response('{text:successfully registered}')
         rootpath='./Files/%s'%username
         if not os.path.exists(rootpath):
             os.mkdir(rootpath)
@@ -68,7 +78,10 @@ async def api_register_user(request):
 
 # @post('/login')
 async def api_login_user(request):
-    data=await request.post()
+    data=await request.json()
+    print(data)
+    # for a in data:
+    #     print(a)
     username=data['name']
     passwd=data['passwd']
     print(username,':',passwd)
@@ -78,8 +91,11 @@ async def api_login_user(request):
         print('user=',user)
         print('user["passwd"]=',user['password'])
         if passwd==user['password']:
-            message='login successfully'
-            message+='\n your directory:'+user['rootpath']
+            data = {'text': 'login successfully',
+                    'path':user['rootpath']
+                    }
+            return web.json_response(data)
+            # message+='\n your directory:'+user['rootpath']
         else:
             message='login failed'
     else:

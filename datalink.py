@@ -173,7 +173,7 @@ async def find(username,autocommit=True):
             if not autocommit:
                 await conn.rollback()
             raise
-    print(affected)
+    # print(affected)
     return affected
 
 
