@@ -6,7 +6,10 @@ import threading
 import requests,os
 from config import config
 
-username=config['username']
+filepath='./ClientFiles/userdata.txt'
+datafile=open(filepath,'r')
+username=datafile.read()
+datafile.close()
 
 def check_timer():
     rootpath='./ClientFiles/'+username
@@ -43,5 +46,5 @@ def download(username,filename):
     'filename':filename,
     'name':username
     }
-    re = requests.get("http://127.0.0.1:8000/download",params=params)
+    re = requests.post("http://127.0.0.1:8000/download",data=params)
     return re.text

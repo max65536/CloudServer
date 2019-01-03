@@ -30,7 +30,7 @@ async def init(loop):
     app.router.add_route('GET','/',index)
     # app.router.add_route('GET','/{name}',index)
     app.router.add_route('POST','/upload',store_file)
-    app.router.add_route('GET','/download',download_file)
+    app.router.add_route('POST','/download',download_file)
 
     app.router.add_route('GET','/login',login)
     app.router.add_route('GET','/register',register)
