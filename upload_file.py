@@ -1,12 +1,13 @@
 import requests
 from config import config
 
+
 def upload_file(file_list):
     file_list_len = len(file_list)
 
-    rootpath='./ClientFiles/userdata.txt'
-    datafile=open(rootpath,'r')
-    username=datafile.read()
+    rootpath = './ClientFiles/userdata.txt'
+    datafile = open(rootpath,'r')
+    username = datafile.read()
     datafile.close()
 
     data = {"name" : username}
@@ -14,7 +15,9 @@ def upload_file(file_list):
     for num in range(file_list_len):
         filename = file_list[num]
         files = {
-        "file": open("./ClientFiles/"+username+'/'+filename, "rb")
+         "file": open("./ClientFiles/"+username+'/'+filename, "rb")
         }
         r = requests.post("http://127.0.0.1:8000/upload", data, files=files)
         print(r.text)
+
+

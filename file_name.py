@@ -1,10 +1,11 @@
 import os
 from config import config
 
+
 def file_name():
-    rootpath='./ClientFiles/userdata.txt'
-    datafile=open(rootpath,'r')
-    username=datafile.read()
+    rootpath = './ClientFiles/userdata.txt'
+    datafile = open(rootpath,'r')
+    username = datafile.read()
     datafile.close()
 
     file_dir = os.getcwd() + '/ClientFiles/%s'%username
