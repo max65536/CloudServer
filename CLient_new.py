@@ -43,11 +43,6 @@ def register():
     e3.place(x=130, y=110, width=100, height=30)
 
 
-def time_start():
-    timer = threading.Timer(1, check_timer)
-    timer.start()
-
-
 def post_data(username,password,url):
     headers = {'Content-Type': 'application/json'}
     data={
@@ -94,26 +89,23 @@ def login1():
             break
 
     print("login as ", username)
+    print(resp.cookies['CloudServer'])
     rootpath = './ClientFiles/userdata.txt'
     f = open(rootpath, 'w+')
     f.write(username)
     f.close()
-    while True:
-        check_timer()
-        # time.sleep(5)
-        # print('sleep------------------------------')
 
+    # while True:
+    check_timer()
+    time.sleep(2)
+    print('sleep-----------')
 
-def sync():
-    time_start()
-
-# login()
 
 
 def entry():
     global flagLogReg
     global root
-    #root.destroy()
+    root.destroy()
     if flagLogReg == 1:
         register1()
     if flagLogReg == 0:
@@ -121,6 +113,10 @@ def entry():
         run_file_check(False)
         login1()
 
+
+def root_func():
+    global root
+    return root
 
 
 global root

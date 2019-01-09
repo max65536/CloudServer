@@ -1,4 +1,3 @@
-
-config={
-    'username':'user6'
+config = {
+    'username': 'user6'
 }

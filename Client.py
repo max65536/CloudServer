@@ -2,7 +2,8 @@ import requests
 import sys
 import json
 import os
-# from client01 import time_start
+from check_timer import check_timer
+import threading,time
 
 COOKIE_NAME='CloudServer'
 # data = {"name" : "user5"}
@@ -57,18 +58,25 @@ def login():
 
     print("login as ",username)
     print(resp.cookies[COOKIE_NAME])
+    cookie_str=(resp.cookies[COOKIE_NAME])
+    username = cookie_str.split('-')[0]
     rootpath='./ClientFiles/userdata.txt'
     f=open(rootpath,'w+')
     f.write(username)
     f.close()
 
-    sync()
     # datafile=open(rootpath,'r')
     # data=datafile.read()
     # print(data)
 
-def sync():
-    time_start()
+def check_forever(delay):
+    while True:
+        check_timer(delay)
+
+def sync(delay):
+    t=threading.Thread(target=check_forever,args=(delay,))
+    t.start()
+    return t
 
 # login()
 def download(username,filename):
@@ -95,9 +103,12 @@ def entry():
             register()
         if command=='login':
             login()
-if __name__ =='__main__':
-    # entry()
+            sync(3)
 
-    download('ooo','file_list.txt')
+if __name__ =='__main__':
+    entry()
+
+
+    # download('ooo','file_list.txt')
 
 
