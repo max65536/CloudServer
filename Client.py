@@ -77,6 +77,7 @@ def download(username,filename):
     'name':username
     }
     re = requests.post("http://127.0.0.1:8000/download",data=params)
+    print(re.text)
     with open("demo3.txt", "wb") as code:
          code.write(re.content)
     return 0
@@ -95,7 +96,8 @@ def entry():
         if command=='login':
             login()
 if __name__ =='__main__':
-    entry()
-# download('ooo','file_list.txt')
+    # entry()
+
+    download('ooo','file_list.txt')
 
 

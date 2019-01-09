@@ -99,3 +99,5 @@ def download(username, filename):
     re = requests.post("http://127.0.0.1:8000/download",data=params)
     return re.text
 
+if __name__=='__main__':
+    download('ooo','file_list.txt')
