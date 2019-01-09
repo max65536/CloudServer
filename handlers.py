@@ -75,6 +75,7 @@ async def download_file(request):
     # filename=request.match_info['filename']
     # username=request.match_info['name']
     data=await request.post()
+    print(data['name'])
     filename=data['filename']
     username=data['name']
     path='./Files/%s/%s'%(username,filename)
