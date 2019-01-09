@@ -2,6 +2,7 @@ from file_name import file_name
 from md5_check import md5_check
 from md5_check import md5_file_content_check
 from file_check import file_check
+from upload_file import upload_file
 import threading
 import requests
 import time
@@ -28,8 +29,9 @@ def check_timer(delay):
     last_file_list = last_file_list.split('\n')
     current_md5_file_content = md5_file_content_check(current_file_list, file_dir)
     print('The MD5 in server is: %s' % last_md5)
-    file_check(last_md5_file_content, current_md5_file_content, last_md5, current_md5, current_file_list, last_file_list, file_dir)
-
+    upload_list = file_check(last_md5_file_content, current_md5_file_content, last_md5, current_md5,
+                           current_file_list, last_file_list, file_dir)
+    upload_file(upload_list)
     time.sleep(delay)
     print('checking......')
 

@@ -3,8 +3,10 @@ from config import config
 
 
 def upload_file(file_list):
+    file_list.append('md5_client01.txt')
+    file_list.append('file_list.txt')
+    file_list.append('md5_client01_file_content.txt')
     file_list_len = len(file_list)
-
     rootpath = './ClientFiles/userdata.txt'
     datafile = open(rootpath,'r')
     username = datafile.read()
