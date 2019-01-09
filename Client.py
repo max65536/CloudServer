@@ -2,8 +2,9 @@ import requests
 import sys
 import json
 import os
-from client01 import time_start
+# from client01 import time_start
 
+COOKIE_NAME='CloudServer'
 # data = {"name" : "user5"}
 # filename='robot.png'
 # files = {
@@ -55,6 +56,7 @@ def login():
             break
 
     print("login as ",username)
+    print(resp.cookies[COOKIE_NAME])
     rootpath='./ClientFiles/userdata.txt'
     f=open(rootpath,'w+')
     f.write(username)
@@ -69,6 +71,21 @@ def sync():
     time_start()
 
 # login()
+def download(username,filename):
+    params={
+    'filename':filename,
+    'name':username
+    }
+    re = requests.post("http://127.0.0.1:8000/download",data=params)
+    with open("demo3.txt", "wb") as code:
+         code.write(re.content)
+    return 0
+
+def addCookie():
+    pass
+
+def getCookie():
+    pass
 
 def entry():
     while True:
@@ -77,5 +94,8 @@ def entry():
             register()
         if command=='login':
             login()
+if __name__ =='__main__':
+    entry()
+# download('ooo','file_list.txt')
 
-entry()
+

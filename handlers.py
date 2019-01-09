@@ -1,7 +1,41 @@
 from aiohttp import web
-import re,os
+import re,os,time,hashlib
 from datalink import user_insert,find
 
+
+COOKIE_NAME='CloudServer'
+_COOKIE_KEY='cloud'
+
+def user2cookie(username,passwd,max_age):
+    '''
+    build cookie string by: id-expires-sha1
+    "用户id" + "过期时间" + SHA1("用户id" + "用户口令" + "过期时间" + "SecretKey")
+    '''
+    expires=str(int(time.time()+max_age))
+    s='%s-%s-%s-%s'%(username,passwd,expires,_COOKIE_KEY)
+    L=[username,expires,hashlib.sha1(s.encode('utf-8')).hexdigest()]
+    return '-'.join(L)
+
+async def cookie2user(cookie_str):
+    if cookie_str is None:
+        return None
+    try:
+        L=cookie_str.split('-')
+        if len(L)!=3:
+            return None
+        uid,expires,sha1=L
+        # if int(expires)<time.time():
+        #     return None
+        user=await find(uid)
+        if user is None:
+            return None
+        s='%s-%s-%s-%s'%(uid,user.passwd,expires,_COOKIE_KEY)
+        if sha1!= hashlib.sha1(s.encode('utf-8')).hexdigest():
+            print('invalid sha1')
+        return user
+    except Exception as e:
+        print(e)
+        raise None
 
 async def login(request):
     login_file=open('./templates/login.html',encoding='utf-8')
@@ -77,6 +111,7 @@ async def api_register_user(request):
         f.close()
     else:
         r=web.Response(text='registration failed')
+        r.set_cookie(COOKIE_NAME,user2cookie(username,passwd,86400),max_age=86400,httponly=True)
     return r
 
 # @post('/login')
@@ -97,10 +132,16 @@ async def api_login_user(request):
             data = {'text': 'login successfully',
                     'path':user['rootpath']
                     }
-            return web.json_response(data)
+            r=web.json_response(data)
+            r.set_cookie(COOKIE_NAME,user2cookie(username,passwd,86400),max_age=86400,httponly=True)
+            return r
             # message+='\n your directory:'+user['rootpath']
         else:
             message='login failed'
     else:
         message='login failed'
-    return web.Response(text=message)
+    r=web.Response(text=message)
+    r.set_cookie(COOKIE_NAME,user2cookie(username,passwd,86400),max_age=86400,httponly=True)
+    # print('-------------------------------')
+    # print(COOKIE_NAME,':',user2cookie(user,86400))
+    return r

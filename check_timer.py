@@ -68,8 +68,7 @@ def check_timer():
         ServerText = tk.Text(root1)
         ServerText.place(x=325, y=35, width=200, height=300)
         vv = tk.IntVar()
-        tk.Radiobutton(root1, text='Upload', variable=vv, value=1, command=run_file_check).place(x=200, y=345,
-                                                                                                 width=100, height=30)
+        tk.Radiobutton(root1, text='Upload', variable=vv, value=1, command=run_file_check).place(x=200, y=345,width=100, height=30)
         tk.Radiobutton(root1, text='download', variable=vv, value=2).place(x=300, y=345, width=100, height=30)
         flag_tk(False)
 
@@ -93,6 +92,10 @@ def check_timer():
 
 
 def download(username, filename):
-    re = requests.get("http://127.0.0.1:8000/download/%s/%s" % (username, filename))
+    params={
+    'filename':filename,
+    'name':username
+    }
+    re = requests.post("http://127.0.0.1:8000/download",data=params)
     return re.text
 

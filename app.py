@@ -1,23 +1,23 @@
 import asyncio
 from aiohttp import web
-from handlers import store_file,download_file,api_register_user,api_login_user,login,register
+from handlers import store_file,download_file,api_register_user,api_login_user,login,register,cookie2user,COOKIE_NAME
 from datalink import create_pool
 
 
-# async def auth_factory(app,handler):
-#     '''
-#     to save the login status of user
-#     '''
-#     async def auth(request):
-#         # print('check user:%s %s'%(request.method,request.path))
-#         request.__user__=None
-#         # cookie_str=request.cookies.get(COOKIE_NAME)
-#         # if cookie_str:
-#         #     user=await cookie2user(cookie_str)
-#         #     if user:
-#         #         request.__user__=user
-#         return (await handler(request))
-#     return auth
+async def auth_factory(app,handler):
+    '''
+    to save the login status of user
+    '''
+    async def auth(request):
+        print('check user:%s %s'%(request.method,request.path))
+        request.__user__=None
+        cookie_str=request.cookies.get(COOKIE_NAME)
+        if cookie_str:
+            user=await cookie2user(cookie_str)
+            if user:
+                request.__user__=user
+        return (await handler(request))
+    return auth
 
 async def index(request):
     # name=request.match_info['name']
@@ -26,7 +26,7 @@ async def index(request):
     return web.Response(text=text)
 
 async def init(loop):
-    app=web.Application(loop=loop)
+    app=web.Application(loop=loop,middlewares=[auth_factory])
     app.router.add_route('GET','/',index)
     # app.router.add_route('GET','/{name}',index)
     app.router.add_route('POST','/upload',store_file)
