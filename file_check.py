@@ -1,6 +1,6 @@
 def file_content_check(last_md5_file_content, current_md5_file_content, current_file_list):
     update_list = []
-    print('length is %d' % len(current_md5_file_content))
+    #print('length is %d' % len(current_md5_file_content))
     num = 0
     while(num < len(current_md5_file_content)):
         if current_md5_file_content[num] != last_md5_file_content[num]:
@@ -13,8 +13,8 @@ def file_check(last_md5_file_content, current_md5_file_content, last_md5, curren
                current_file_list, last_file_list, file_dir):
 
     last_md5_file_content.pop()
-    print('last list is %s' % last_md5_file_content)
-    print('current list is %s' % current_md5_file_content)
+    #print('last list is %s' % last_md5_file_content)
+    #print('current list is %s' % current_md5_file_content)
     update_list = []
 
     if last_md5 == current_md5:
@@ -23,11 +23,6 @@ def file_check(last_md5_file_content, current_md5_file_content, last_md5, curren
         print('update list is %d' % len(update_list)) #0
         print('both name md5 are same')
     else:
-        file_list_path = [file_dir + '/file_list.txt']
-        with open(file_list_path[0], 'w') as f:
-            for num in current_file_list:
-                print(num, file=f)
-
         if len(last_file_list) == 0:
             update_list = current_file_list
             print('There is no such client before')
