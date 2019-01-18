@@ -37,6 +37,45 @@ async def cookie2user(cookie_str):
         print(e)
         raise None
 
+def file_name(username):
+    file_dir = os.getcwd() + '/Files/%s'%username
+
+    #print('Current directory is %s' % file_dir)
+    for root, dirs, files in os.walk(file_dir):
+        #print(root)
+        #print(dirs)
+        print(files)
+    return files, file_dir
+
+def md5_check(file_list, file_dir):
+    file_list_len = len(file_list)
+    print('The number of files are is: %d' % file_list_len)
+    md5_result = hashlib.md5(file_dir.encode('ascii'))
+    for num in range(file_list_len):
+        md5_result.update(file_list[num].encode('ascii'))
+    print('MD5 is: %s' % (md5_result.hexdigest()))
+    return md5_result.hexdigest()
+
+
+def md5_file_content_check(file_list, file_dir):
+    md5_file_content = []
+    file_list_len = len(file_list)
+
+    for num in range(file_list_len):        #read all files content and calculate their own md5
+        with open(file_dir+'/'+file_list[num], 'rb') as f:
+            content = f.read()
+            md5_file_content.append(hashlib.md5(content).hexdigest())
+
+    with open(file_dir + '/md5_client01_file_content.txt', 'w') as f:
+        for num in md5_file_content:
+            print(num, file=f)
+    return md5_file_content
+
+def md5_update(username):
+    rootdir='./Files/%s'%username
+    file_list=os.listdir(rootdir)
+    md5_all=md5_check(file_list,rootdir)
+
 async def login(request):
     login_file=open('./templates/login.html',encoding='utf-8')
     resp=web.Response(body=login_file.read().encode('utf-8'))
@@ -67,6 +106,18 @@ async def store_file(request):
         for line in file_content:
             new_file.write(line)
         new_file.close()
+
+        # current_file_list, file_dir = file_name(username)
+        # current_file_list.remove('file_list.txt')
+        # current_file_list.remove('md5_client01_file_content.txt')
+        # current_file_list.remove('md5_client01.txt')
+        # file_list_path = [file_dir + '/file_list.txt']
+        # # file_dir='./Files/'+username
+        # current_md5 = md5_check(current_file_list, file_dir)
+        # md5_path = [file_dir + '/md5_client01.txt']
+        # with open(md5_path[0], 'w') as f:
+        #     f.write(current_md5)
+
         print(filename,' saved')
     return web.Response(text='file received')
         # 'path':path,
@@ -146,3 +197,4 @@ async def api_login_user(request):
     # print('-------------------------------')
     # print(COOKIE_NAME,':',user2cookie(user,86400))
     return r
+

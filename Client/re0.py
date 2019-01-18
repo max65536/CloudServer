@@ -23,4 +23,14 @@ def download(username,filename):
     re = requests.post("http://127.0.0.1:8000/download",data=params)
     return re.text
 
-print(download('ooo','apis.txt'))
+def upload(username,filename):
+
+    data = {"name" : username}
+    f=open("./ClientFiles/"+username+'/'+filename, "rb")
+    files = {
+     "file": f
+    }
+
+    r = requests.post("http://127.0.0.1:8000/upload", data, files=files)
+
+print(upload('ooo','Figure_1.png'))
