@@ -4,16 +4,16 @@ import requests
 import time,json
 
 
-filepath='./ClientFiles/userdata.txt'
-datafile=open(filepath,'r')
-username=datafile.read()
-datafile.close()
+# filepath='./ClientFiles/userdata.txt'
+# datafile=open(filepath,'r')
+# username=datafile.read()
+# datafile.close()
 
 CMD_UPLOAD=0
 CMD_DOWNLOAD=1
 
-def check_timer(delay,command):
-    current_file_list, file_dir = file_name()
+def check_timer(username,delay,command):
+    alldir, current_file_list, file_dir = file_name()
     current_file_list.remove('file_list.txt')
     current_file_list.remove('md5_client01_file_content.txt')
     current_file_list.remove('md5_client01.txt')
@@ -28,11 +28,11 @@ def check_timer(delay,command):
 
     with open(md5_path[0], 'w') as f:
         f.write(current_md5)
-
+    # print('last_md5=')
     last_md5 = download(username,'md5_client01.txt')
     last_md5 = last_md5
     last_md5_file_content_t = download(username,'md5_client01_file_content.txt')
-    print('last_md5_file_content_t=',last_md5_file_content_t)
+    # print('last_md5_file_content_t=',last_md5_file_content_t)
     if last_md5_file_content_t=='':
         last_md5_file_content=None
     else:
@@ -64,3 +64,6 @@ def download(username,filename):
     }
     re = requests.post("http://127.0.0.1:8000/download",data=params)
     return re.text
+
+if __name__=='__main__':
+    check_timer('fff',1,CMD_DOWNLOAD)

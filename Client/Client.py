@@ -4,29 +4,10 @@ import json
 import os
 from check_timer import check_timer
 import threading,time
-
-COOKIE_NAME='CloudServer'
+from core_apis2 import api_login,api_register,start_sync
 
 CMD_UPLOAD=0
 CMD_DOWNLOAD=1
-# data = {"name" : "user5"}
-# filename='robot.png'
-# files = {
-#   "file" : open("./ClientFiles/"+filename, "rb")
-# }
-# r = requests.post("http://127.0.0.1:8000/upload", data, files=files)
-
-# r = requests.get('https://www.google.com')
-# print(r.text)
-def post_data(username,password,url):
-    headers = {'Content-Type': 'application/json'}
-    data={
-            "name":username,
-            "passwd":password
-    }
-    r = requests.post(url=url, headers=headers,data=json.dumps(data))
-    print(r.text)
-    return r
 
 def register():
     while True:
@@ -35,88 +16,90 @@ def register():
         password1=input("password:")
         password2=input("repeat  :")
         print(password1,password2)
-
-        rootpath='./ClientFiles/userdata.txt'
-        f=open(rootpath,'w+')
-        f.write(username)
-        f.close()
-
         if password2==password1:
-            post_data(username,password1,"http://127.0.0.1:8000/api/register")
-            rootpath='./ClientFiles/'+username
-            if not os.path.exists(rootpath):
-                os.mkdir(rootpath)
-
-            f=open(rootpath+'/file_list.txt','wb')
-            f.close()
-            upload(username,'file_list.txt')
-            f=open(rootpath+'/md5_client01_file_content.txt','wb')
-            f.close()
-            upload(username,'md5_client01_file_content.txt')
-            f=open(rootpath+'/md5_client01.txt','wb')
-            f.close()
-            upload(username,'md5_client01.txt')
-
-
+            api_register(username,password1)
             break
         else:
             print("password not the same")
 
-# register()
+# def api_login(username,password):
+
+#     resp=post_data(username,password,"http://127.0.0.1:8000/api/login")
+#     if resp.text=='login failed':
+#         return False
+
+#     print("login as ",username)
+#     print(resp.cookies[COOKIE_NAME])
+#     cookie_str=(resp.cookies[COOKIE_NAME])
+#     username = cookie_str.split('-')[0]
+#     global USERNAME
+#     USERNAME=username
+
+#     dirs='./ClientFiles/%s/'%USERNAME
+#     if not os.path.exists(dirs):
+#         os.makedirs(dirs)
+
+#     rootpath='./ClientFiles/userdata.txt'
+#     f=open(rootpath,'w+')
+#     f.write(username)
+#     f.close()
+
+#     download_configs(USERNAME)
+
+#     check_timer(USERNAME,1,CMD_DOWNLOAD)
+#     return True
+
 def login():
     while True:
         username = input("username:")
         password=input("password:")
-        resp=post_data(username,password,"http://127.0.0.1:8000/api/login")
-        if resp.text!='login failed':
+        re=api_login(username,password)
+        if re:
             break
-
     print("login as ",username)
-    print(resp.cookies[COOKIE_NAME])
-    cookie_str=(resp.cookies[COOKIE_NAME])
-    username = cookie_str.split('-')[0]
-    rootpath='./ClientFiles/userdata.txt'
-    f=open(rootpath,'w+')
-    f.write(username)
-    f.close()
 
-    check_timer(1,CMD_DOWNLOAD)
-
-    # datafile=open(rootpath,'r')
-    # data=datafile.read()
-    # print(data)
 
 def check_forever(delay,command):
     while True:
-        check_timer(delay,command)
+        start_sync(delay,command)
 
 def sync(delay,command):
     t=threading.Thread(target=check_forever,args=(delay,command))
     t.start()
     return t
 
-# login()
 def download(username,filename):
     params={
     'filename':filename,
     'name':username
     }
-    re = requests.post("http://127.0.0.1:8000/download",data=params)
-    print(re.text)
-    with open("demo3.txt", "wb") as code:
-         code.write(re.content)
-    return 0
+    re = requests.post("http://127.0.0.1:8000/download",cookies=COOKIE,data=params)
+    path='./ClientFiles/%s/%s'%(username,filename)
+    print(path)
+    pa_dir=os.path.dirname(path)
+    print('pa_dir=',pa_dir)
+    if not os.path.exists(pa_dir):
+        os.makedirs(pa_dir)
+
+    with open(path,'wb') as f:
+        f.write(re.content)
+
+    return re.text
 
 def upload(username,filename):
-    data = {"name" : username}
+    data = {"name" : username,
+            "filename":filename
+    }
     files = {
      "file": open("./ClientFiles/"+username+'/'+filename, "rb")
     }
     r = requests.post("http://127.0.0.1:8000/upload", data, files=files)
     return 0
 
-def addCookie():
-    pass
+def writeCookie():
+    filepath='ClientFiles/cookies.txt'
+    with open('cookies.txt','w') as f:
+        f.write(COOKIE)
 
 def getCookie():
     pass
@@ -124,6 +107,8 @@ def getCookie():
 def entry():
     while True:
         command = input("command:")
+        if command=='stop':
+            break
         if command=='register':
             register()
             login()
@@ -131,16 +116,20 @@ def entry():
             login()
         command = input("push or pull:")
         if command=='push':
-            sync(3,CMD_UPLOAD)
+            sync(5,CMD_UPLOAD)
         if command=='pull':
-            sync(3,CMD_DOWNLOAD)
+            sync(5,CMD_DOWNLOAD)
 
 
 if __name__ =='__main__':
+    # entry()
+    # sync('fff',5,CMD_UPLOAD)
+
+    # login()
+    # re=download('fff','md5_client01.txt')
+    # print(COOKIE)
+    # print('re=',re)
+    # download_configs('fff')
+    # upload('fff','1/scriptaculous.js')
     entry()
-    # sync(3,CMD_DOWNLOAD)
-
-
-    # download('ooo','file_list.txt')
-
 

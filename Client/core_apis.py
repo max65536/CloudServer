@@ -14,13 +14,21 @@ def file_name():
 
     file_dir = os.getcwd() + '/ClientFiles/%s'%username
 
-    #print('Current directory is %s' % file_dir)
-    # for root, dirs, files in os.walk(file_dir):
-    #     #print(root)
-    #     #print(dirs)
-    #     print(files)
-    files=os.listdir(file_dir)
-    return files, file_dir
+    # files=os.listdir(file_dir)
+    # return files, file_dir
+
+    allfile=[]
+    alldir=[]
+    for dirpath,dirnames,filenames in os.walk(file_dir):
+        for dir in dirnames:
+            alldir.append(os.path.join(dirpath,dir))
+        for filename in filenames:
+            filepath=os.path.join(dirpath, filename)
+            allfile.append(os.path.relpath(filepath,file_dir))
+    print('file_dir=',file_dir)
+    print(allfile)
+    return alldir,allfile,file_dir
+
 
 #file_check.py
 
@@ -55,6 +63,7 @@ def file_check(last_md5_file_content,last_md5,last_file_list,current_md5_file_co
     #preprocess
     # preprocess(last_md5_file_content)
     # preprocess(last_md5)
+    # print('preprocess........')
     preprocess(last_file_list)
     # preprocess(current_md5_file_content)
     # preprocess(current_md5)
@@ -132,6 +141,8 @@ def upload_file(file_list):
         files = {
          "file": f
         }
+        data['filename']=filename
+        # print('data=',data)
         # f.close()
         r = requests.post("http://127.0.0.1:8000/upload", data, files=files)
         print(r.text)
@@ -159,6 +170,7 @@ def download_file(file_list):
         # files = {
         #  "file": open("./ClientFiles/"+username+'/'+filename, "rb")
         # }
+        print('data=',data)
         r = requests.post("http://127.0.0.1:8000/download", data=data)
         # print(r.text)
         with open(path, "wb") as file:

@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp import web
-from handlers import store_file,download_file,api_register_user,api_login_user,login,register,cookie2user,COOKIE_NAME
+from handlers import store_file,download_file,api_register_user,api_login_user,login,register,cookie2user,COOKIE_NAME,test,download_json,delete_file
 from datalink import create_pool
 
 
@@ -28,9 +28,13 @@ async def index(request):
 async def init(loop):
     app=web.Application(loop=loop,middlewares=[auth_factory])
     app.router.add_route('GET','/',index)
+    app.router.add_route('GET','/test',test)
     # app.router.add_route('GET','/{name}',index)
     app.router.add_route('POST','/upload',store_file)
     app.router.add_route('POST','/download',download_file)
+    app.router.add_route('POST','/delete',delete_file)
+
+    app.router.add_route('POST','/download_json',download_json)
 
     app.router.add_route('GET','/login',login)
     app.router.add_route('GET','/register',register)

@@ -1,6 +1,7 @@
 from aiohttp import web
-import re,os,time,hashlib
+import re,os,time,hashlib,json
 from datalink import user_insert,find
+import shutil
 
 
 COOKIE_NAME='CloudServer'
@@ -26,55 +27,18 @@ async def cookie2user(cookie_str):
         uid,expires,sha1=L
         # if int(expires)<time.time():
         #     return None
-        user=await find(uid)
-        if user is None:
+        rows=await find(uid)
+        if rows is None:
             return None
-        s='%s-%s-%s-%s'%(uid,user.passwd,expires,_COOKIE_KEY)
+        user=rows[0]
+        print('user=',user)
+        s='%s-%s-%s-%s'%(uid,user["password"],expires,_COOKIE_KEY)
         if sha1!= hashlib.sha1(s.encode('utf-8')).hexdigest():
             print('invalid sha1')
         return user
     except Exception as e:
         print(e)
         raise None
-
-def file_name(username):
-    file_dir = os.getcwd() + '/Files/%s'%username
-
-    #print('Current directory is %s' % file_dir)
-    for root, dirs, files in os.walk(file_dir):
-        #print(root)
-        #print(dirs)
-        print(files)
-    return files, file_dir
-
-def md5_check(file_list, file_dir):
-    file_list_len = len(file_list)
-    print('The number of files are is: %d' % file_list_len)
-    md5_result = hashlib.md5(file_dir.encode('ascii'))
-    for num in range(file_list_len):
-        md5_result.update(file_list[num].encode('ascii'))
-    print('MD5 is: %s' % (md5_result.hexdigest()))
-    return md5_result.hexdigest()
-
-
-def md5_file_content_check(file_list, file_dir):
-    md5_file_content = []
-    file_list_len = len(file_list)
-
-    for num in range(file_list_len):        #read all files content and calculate their own md5
-        with open(file_dir+'/'+file_list[num], 'rb') as f:
-            content = f.read()
-            md5_file_content.append(hashlib.md5(content).hexdigest())
-
-    with open(file_dir + '/md5_client01_file_content.txt', 'w') as f:
-        for num in md5_file_content:
-            print(num, file=f)
-    return md5_file_content
-
-def md5_update(username):
-    rootdir='./Files/%s'%username
-    file_list=os.listdir(rootdir)
-    md5_all=md5_check(file_list,rootdir)
 
 async def login(request):
     login_file=open('./templates/login.html',encoding='utf-8')
@@ -88,6 +52,33 @@ async def register(request):
     resp.headers['content-type']='text/html'
     return resp
 
+# async def store_file(request):
+#     # logging.info('upload image....................................')
+#     # logging.info(request.__data__)
+#     if request.method=='POST':
+#         data=await request.post()
+#         if data is None:
+#             return None
+#         file=data['file']
+#         if file is None:
+#             return None
+#         # filename=file.filename
+#         filename=data['filename']
+#         username=data['name']
+#         file_content=file.file
+#         path='./Files/%s/%s'%(username,filename)
+
+#         pa_dir=os.path.dirname(path)
+#         if not os.path.exists(pa_dir):
+#             os.makedirs(pa_dir)
+
+#         with open(path,'wb') as f:
+#             for line in file_content:
+#                 f.write(line)
+
+#         print(filename,' saved at ',path)
+#     return web.Response(text='file received')
+
 async def store_file(request):
     # logging.info('upload image....................................')
     # logging.info(request.__data__)
@@ -95,40 +86,91 @@ async def store_file(request):
         data=await request.post()
         if data is None:
             return None
-        file=data['file']
-        if file is None:
-            return None
-        filename=file.filename
+
         username=data['name']
-        file_content=file.file
-        path='./Files/%s/%s'%(username,filename)
-        new_file=open(path,'wb')
-        for line in file_content:
-            new_file.write(line)
-        new_file.close()
+        i=0
+        while True:
+            field='field%s'%i
+            i+=1
+            if field not in data:
+                break
+            file=data[field]
+            filename=file.filename
+            filecontent=file.file
+            path='./Files/%s/%s'%(username,filename)
+            pa_dir=os.path.dirname(path)
+            if not os.path.exists(pa_dir):
+                os.makedirs(pa_dir)
 
-        # current_file_list, file_dir = file_name(username)
-        # current_file_list.remove('file_list.txt')
-        # current_file_list.remove('md5_client01_file_content.txt')
-        # current_file_list.remove('md5_client01.txt')
-        # file_list_path = [file_dir + '/file_list.txt']
-        # # file_dir='./Files/'+username
-        # current_md5 = md5_check(current_file_list, file_dir)
-        # md5_path = [file_dir + '/md5_client01.txt']
-        # with open(md5_path[0], 'w') as f:
-        #     f.write(current_md5)
+            with open(path,'wb') as f:
+                for line in filecontent:
+                    f.write(line)
+            print(filename,' saved at ',path)
 
-        print(filename,' saved')
+        filelist=data['filelist']
+        path='./Files/%s/%s'%(username,'md5_client01_file_content.txt')
+        with open(path,'w') as f:
+            f.write(filelist)
+
     return web.Response(text='file received')
-        # 'path':path,
+
+async def delete_file(request):
+    data=await request.post()
+    if request.__user__ is None:
+        return web.Response(text='please login first')
+    username=request.__user__['username']
+    filename=data['filename']
+    filelist=data['filelist']
+    path='./Files/%s/%s'%(username,'md5_client01_file_content.txt')
+    with open(path,'w') as f:
+        f.write(filelist)
+
+    path='./Files/%s/%s'%(username,filename)
+    if os.path.exists(path):
+        if os.path.isfile(path):
+            os.remove(path)
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        return web.Response(text='%s deleted'%filename)
+    else:
+        print('no such file or directory:%s'%path)
+        return web.Response(text='no such file or directory:%s'%path)
+
+
+async def upload_json():
+    if request.__user__ is None:
+        return web.Response(text='user not found')
+    username=request.__user__['username']
+
+async def download_json(request):
+    await request.post()
+    if request.__user__ is None:
+        return web.Response(text='user not found')
+    username=request.__user__['username']
+
+    # username='fff'
+
+    path='./Files/%s/%s'%(username,'md5_client01_file_content.txt')
+    with open(path) as f:
+        content=f.read()
+
+    resp=web.Response(body=content)
+    resp.content_type='application/json;charset=utf-8'
+    return resp
+
+
 
 async def download_file(request):
     # filename=request.match_info['filename']
     # username=request.match_info['name']
+    # print('COOKIE=:')
+    # print(request.__user__)
     data=await request.post()
+    if request.__user__ is None:
+        return web.Response(text='login timeout, please login again')
     print(data['name'])
     filename=data['filename']
-    username=data['name']
+    username=request.__user__['username']
     path='./Files/%s/%s'%(username,filename)
     return web.FileResponse(path)
 
@@ -151,19 +193,21 @@ async def api_register_user(request):
     print(username,':',passwd)
     rows=await user_insert(username=username,password=passwd)
     if rows>0:
-        r=web.json_response('{text:successfully registered}')
+        # r=web.json_response('{text:successfully registered}')
+        r=web.Response(text='successfully registered')
         rootpath='./Files/%s'%username
         if not os.path.exists(rootpath):
             os.mkdir(rootpath)
-        f=open(rootpath+'/file_list.txt','wb')
+        # f=open(rootpath+'/file_list.txt','w')
+        # f.close()
+        f=open(rootpath+'/md5_client01_file_content.txt','w')
+        f.write('{}')
         f.close()
-        f=open(rootpath+'/md5_client01_file_content.txt','wb')
-        f.close()
-        f=open(rootpath+'/md5_client01.txt','wb')
-        f.close()
+        # f=open(rootpath+'/md5_client01.txt','w')
+        # f.close()
     else:
         r=web.Response(text='registration failed')
-        r.set_cookie(COOKIE_NAME,user2cookie(username,passwd,86400),max_age=86400,httponly=True)
+    r.set_cookie(COOKIE_NAME,user2cookie(username,passwd,86400),max_age=86400,httponly=True)
     return r
 
 # @post('/login')
@@ -197,4 +241,7 @@ async def api_login_user(request):
     # print('-------------------------------')
     # print(COOKIE_NAME,':',user2cookie(user,86400))
     return r
+
+async def test(request):
+    print(request.__user__)
 
