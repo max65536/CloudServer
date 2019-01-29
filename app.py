@@ -3,13 +3,15 @@ from aiohttp import web
 from handlers import store_file,download_file,api_register_user,api_login_user,login,register,cookie2user,COOKIE_NAME,test,download_json,delete_file
 from datalink import create_pool
 
+import logging; logging.basicConfig(level=logging.INFO)
+
 
 async def auth_factory(app,handler):
     '''
     to save the login status of user
     '''
     async def auth(request):
-        print('check user:%s %s'%(request.method,request.path))
+        logging.info('check user:%s %s'%(request.method,request.path))
         request.__user__=None
         cookie_str=request.cookies.get(COOKIE_NAME)
         if cookie_str:
@@ -43,11 +45,13 @@ async def init(loop):
     # app.router.add_route('GET','')
     app.router.add_static('/static/','./static')
     await create_pool(loop=loop,host='localhost',port=3306,user='root',password='root',db='CloudServer')
-    # srv=await loop.create_server(app.make_handler(),'127.0.0.1',8000)
-    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 8000)
-    print('Server started at http://127.0.0.1:8000...')
-    return srv
+    # srv = await loop.create_server(app.make_handler(), host='127.0.0.1', port=8000)
+    logging.info('Server started at http://127.0.0.1:8000...')
+    return app
 
 loop=asyncio.get_event_loop()
-loop.run_until_complete(init(loop))
-loop.run_forever()
+# loop.run_until_complete(init(loop))
+# loop.run_forever()
+
+app=loop.run_until_complete(init(loop))
+web.run_app(app,host='127.0.0.1',port=8000,access_log=None)

@@ -4,10 +4,11 @@ import json
 import os
 from check_timer import check_timer
 import threading,time
-from core_apis2 import api_login,api_register,start_sync
+from core_apis2 import api_login,api_register,start_sync,delete_file
 
 CMD_UPLOAD=0
 CMD_DOWNLOAD=1
+HOST='http://95.169.20.170'
 
 def register():
     while True:
@@ -24,7 +25,7 @@ def register():
 
 # def api_login(username,password):
 
-#     resp=post_data(username,password,"http://127.0.0.1:8000/api/login")
+#     resp=post_data(username,password,HOST+"/api/login")
 #     if resp.text=='login failed':
 #         return False
 
@@ -73,7 +74,7 @@ def download(username,filename):
     'filename':filename,
     'name':username
     }
-    re = requests.post("http://127.0.0.1:8000/download",cookies=COOKIE,data=params)
+    re = requests.post(HOST+"/download",cookies=COOKIE,data=params)
     path='./ClientFiles/%s/%s'%(username,filename)
     print(path)
     pa_dir=os.path.dirname(path)
@@ -93,7 +94,7 @@ def upload(username,filename):
     files = {
      "file": open("./ClientFiles/"+username+'/'+filename, "rb")
     }
-    r = requests.post("http://127.0.0.1:8000/upload", data, files=files)
+    r = requests.post(HOST+"/upload", data, files=files)
     return 0
 
 def writeCookie():
@@ -114,11 +115,14 @@ def entry():
             login()
         if command=='login':
             login()
-        command = input("push or pull:")
+        command = input("push or pull or delete:")
         if command=='push':
             sync(5,CMD_UPLOAD)
         if command=='pull':
             sync(5,CMD_DOWNLOAD)
+        if command=='delete':
+            filename = input("filename:")
+            delete_file(filename)
 
 
 if __name__ =='__main__':

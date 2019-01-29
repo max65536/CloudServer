@@ -6,6 +6,7 @@ CMD_DOWNLOAD=1
 COOKIE_NAME='CloudServer'
 USERNAME='fff'
 COOKIE='{"CloudServer": "fff-1548694821-52bbae7526649fc6aeb7d80bdd4771717b37484e"}'
+HOST='http://95.169.20.170'
 
 def get_filelist(username):
     file_dir = os.getcwd() + '/ClientFiles/%s'%username
@@ -50,7 +51,7 @@ def file_compare():
     pass
 
 def getjson():
-    re = requests.post(url="http://127.0.0.1:8000/download_json",cookies=COOKIE)
+    re = requests.post(url=HOST+"/download_json",cookies=COOKIE)
     # print(re)
     serverlist=json.loads(re.text)
     print('COOKIE=',COOKIE)
@@ -72,7 +73,7 @@ def getjson():
 #          "file": f
 #         }
 #         data['filename']=filename
-#         r = requests.post("http://127.0.0.1:8000/upload", data=data,cookies=COOKIE, files=files)
+#         r = requests.post(HOST+"/upload", data=data,cookies=COOKIE, files=files)
 
 def upload_all():
     serverdict=getjson()
@@ -95,7 +96,7 @@ def upload_all():
         i+=1
         data['filename']=filename
     # print('files=',files)
-    r = requests.post("http://127.0.0.1:8000/upload", data=data,cookies=COOKIE, files=files)
+    r = requests.post(HOST+"/upload", data=data,cookies=COOKIE, files=files)
 
 def download_all():
     serverdict=getjson()
@@ -114,7 +115,7 @@ def download_all():
     for filename in file_list:
         data['filename']=filename
         path='./ClientFiles/%s/%s'%(username,filename)
-        r = requests.post("http://127.0.0.1:8000/download", cookies=COOKIE,data=data)
+        r = requests.post(HOST+"/download", cookies=COOKIE,data=data)
         pa_dir=os.path.dirname(path)
         if not os.path.exists(pa_dir):
             os.makedirs(pa_dir)
@@ -135,7 +136,7 @@ def delete_file(filename):
                 'filelist':json.dumps(localdict),
                 'filename':filename
                 }
-        r = requests.post("http://127.0.0.1:8000/delete", cookies=COOKIE,data=data)
+        r = requests.post(HOST+"/delete", cookies=COOKIE,data=data)
     else:
         print('no such file or directory:%s'%path)
 
@@ -150,7 +151,7 @@ def post_data(username,password,url):
     return r
 
 def api_register(username,password):
-    resp=post_data(username,password,"http://127.0.0.1:8000/api/register")
+    resp=post_data(username,password,HOST+"/api/register")
 
     rootpath='./ClientFiles/'+username
     if not os.path.exists(rootpath):
@@ -166,7 +167,7 @@ def api_register(username,password):
 
 def api_login(username,password):
 
-    resp=post_data(username,password,"http://127.0.0.1:8000/api/login")
+    resp=post_data(username,password,HOST+"/api/login")
     if resp.text=='login failed':
         return False
 

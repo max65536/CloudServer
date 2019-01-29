@@ -2,7 +2,7 @@ from aiohttp import web
 import re,os,time,hashlib,json
 from datalink import user_insert,find
 import shutil
-
+import logging
 
 COOKIE_NAME='CloudServer'
 _COOKIE_KEY='cloud'
@@ -31,13 +31,13 @@ async def cookie2user(cookie_str):
         if rows is None:
             return None
         user=rows[0]
-        print('user=',user)
+        logging.info('user=',user)
         s='%s-%s-%s-%s'%(uid,user["password"],expires,_COOKIE_KEY)
         if sha1!= hashlib.sha1(s.encode('utf-8')).hexdigest():
-            print('invalid sha1')
+            logging.info('invalid sha1')
         return user
     except Exception as e:
-        print(e)
+        logging.info(e)
         raise None
 
 async def login(request):
@@ -105,7 +105,7 @@ async def store_file(request):
             with open(path,'wb') as f:
                 for line in filecontent:
                     f.write(line)
-            print(filename,' saved at ',path)
+            logging.info(filename,' saved at ',path)
 
         filelist=data['filelist']
         path='./Files/%s/%s'%(username,'md5_client01_file_content.txt')
@@ -129,11 +129,13 @@ async def delete_file(request):
     if os.path.exists(path):
         if os.path.isfile(path):
             os.remove(path)
+            logging.info('user %s delete file %s'%(username,path))
         if os.path.isdir(path):
             shutil.rmtree(path)
+            logging.info('user %s delete directory %s'%(username,path))
         return web.Response(text='%s deleted'%filename)
     else:
-        print('no such file or directory:%s'%path)
+        logging.info('no such file or directory:%s'%path)
         return web.Response(text='no such file or directory:%s'%path)
 
 
@@ -168,9 +170,12 @@ async def download_file(request):
     data=await request.post()
     if request.__user__ is None:
         return web.Response(text='login timeout, please login again')
-    print(data['name'])
+    # print(data['name'])
     filename=data['filename']
     username=request.__user__['username']
+
+    logging.info('user:%s download file %s'%(username,filename))
+
     path='./Files/%s/%s'%(username,filename)
     return web.FileResponse(path)
 
@@ -190,11 +195,12 @@ async def api_register_user(request):
     print(data)
     username=data['name']
     passwd=data['passwd']
-    print(username,':',passwd)
+    # print(username,':',passwd)
     rows=await user_insert(username=username,password=passwd)
     if rows>0:
         # r=web.json_response('{text:successfully registered}')
         r=web.Response(text='successfully registered')
+        logging.info('%s registered'%username)
         rootpath='./Files/%s'%username
         if not os.path.exists(rootpath):
             os.mkdir(rootpath)
@@ -218,7 +224,8 @@ async def api_login_user(request):
     #     print(a)
     username=data['name']
     passwd=data['passwd']
-    print(username,':',passwd)
+    # print(username,':',passwd)
+    logging.info('%s login'% username)
     rows=await find(username=username)
     if len(rows)>0:
         user=rows[0]
