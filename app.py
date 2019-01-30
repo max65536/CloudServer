@@ -11,13 +11,15 @@ async def auth_factory(app,handler):
     to save the login status of user
     '''
     async def auth(request):
-        logging.info('check user:%s %s'%(request.method,request.path))
+        # logging.info('check user:%s %s'%(request.method,request.path))
         request.__user__=None
         cookie_str=request.cookies.get(COOKIE_NAME)
         if cookie_str:
             user=await cookie2user(cookie_str)
             if user:
                 request.__user__=user
+                if request.path!=r'/download_json':
+                    logging.info('user %s :%s %s'%(request.__user__['username'],request.method,request.path))
         return (await handler(request))
     return auth
 
@@ -43,10 +45,10 @@ async def init(loop):
     app.router.add_route('POST','/api/register',api_register_user)
     app.router.add_route('POST','/api/login',api_login_user)
     # app.router.add_route('GET','')
-    app.router.add_static('/static/','./static')
-    await create_pool(loop=loop,host='localhost',port=3306,user='root',password='root',db='CloudServer')
+    # app.router.add_static('/static/','./static')
+    await create_pool(loop=loop,host='localhost',port=3306,user='root',password='root',db='cloudserver')
     # srv = await loop.create_server(app.make_handler(), host='127.0.0.1', port=8000)
-    logging.info('Server started at http://127.0.0.1:8000...')
+    logging.info('Server started at http://127.0.0.1:9000...')
     return app
 
 loop=asyncio.get_event_loop()
@@ -54,4 +56,4 @@ loop=asyncio.get_event_loop()
 # loop.run_forever()
 
 app=loop.run_until_complete(init(loop))
-web.run_app(app,host='127.0.0.1',port=8000,access_log=None)
+web.run_app(app,host='127.0.0.1',port=9000,access_log=None)

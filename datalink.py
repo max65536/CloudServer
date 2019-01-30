@@ -47,7 +47,7 @@ async def select(sql,args,size=None):
             else:
                 rs=await cur.fetchall()
         await cur.close()
-        print('rows returned: %s' %len(rs))
+        # print('rows returned: %s' %len(rs))
         return rs
 
 class Field(object):

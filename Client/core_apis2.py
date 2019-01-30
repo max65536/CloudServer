@@ -5,8 +5,10 @@ CMD_UPLOAD=0
 CMD_DOWNLOAD=1
 COOKIE_NAME='CloudServer'
 USERNAME='fff'
-COOKIE='{"CloudServer": "fff-1548694821-52bbae7526649fc6aeb7d80bdd4771717b37484e"}'
+# COOKIE={"CloudServer": "fff-1548694821-52bbae7526649fc6aeb7d80bdd4771717b37484e"}
+COOKIE=''
 HOST='http://95.169.20.170'
+# HOST='http://127.0.0.1:9000'
 
 def get_filelist(username):
     file_dir = os.getcwd() + '/ClientFiles/%s'%username
@@ -55,7 +57,7 @@ def getjson():
     # print(re)
     serverlist=json.loads(re.text)
     print('COOKIE=',COOKIE)
-    print('serverdict=',serverlist)
+    # print('serverdict=',serverlist)
     return serverlist
 
 # def upload_all():
@@ -74,6 +76,11 @@ def getjson():
 #         }
 #         data['filename']=filename
 #         r = requests.post(HOST+"/upload", data=data,cookies=COOKIE, files=files)
+def get_delete_files():
+    serverdict=getjson()
+    localdict=get_localdict(USERNAME)
+    update_list=get_updatelist(localdict,serverdict)
+    return update_list
 
 def upload_all():
     serverdict=getjson()
@@ -96,7 +103,9 @@ def upload_all():
         i+=1
         data['filename']=filename
     # print('files=',files)
-    r = requests.post(HOST+"/upload", data=data,cookies=COOKIE, files=files)
+    print('update_list=',update_list)
+    if len(update_list)>0:
+        r = requests.post(HOST+"/upload", data=data,cookies=COOKIE, files=files)
 
 def download_all():
     serverdict=getjson()
@@ -190,12 +199,12 @@ def start_sync(delay,command):
     print('username=',USERNAME,'   COOKIE=',COOKIE)
     if command==CMD_UPLOAD:
         upload_all()
-        time.sleep(delay)
+        # time.sleep(delay)
         print('sync Client to Server......')
 
     if command==CMD_DOWNLOAD:
         download_all()
-        time.sleep(delay)
+        # time.sleep(delay)
         print('sync Server to Client......')
 
 

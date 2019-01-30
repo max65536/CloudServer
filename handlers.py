@@ -25,13 +25,14 @@ async def cookie2user(cookie_str):
         if len(L)!=3:
             return None
         uid,expires,sha1=L
-        # if int(expires)<time.time():
-        #     return None
+        if int(expires)<time.time():
+            return None
         rows=await find(uid)
         if rows is None:
             return None
         user=rows[0]
-        logging.info('user=',user)
+        # logging.info('user=',user)
+        # print(cookie_str)
         s='%s-%s-%s-%s'%(uid,user["password"],expires,_COOKIE_KEY)
         if sha1!= hashlib.sha1(s.encode('utf-8')).hexdigest():
             logging.info('invalid sha1')
@@ -105,7 +106,7 @@ async def store_file(request):
             with open(path,'wb') as f:
                 for line in filecontent:
                     f.write(line)
-            logging.info(filename,' saved at ',path)
+            logging.info(filename+' saved at '+path)
 
         filelist=data['filelist']
         path='./Files/%s/%s'%(username,'md5_client01_file_content.txt')

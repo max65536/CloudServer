@@ -63,6 +63,7 @@ def login():
 def check_forever(delay,command):
     while True:
         start_sync(delay,command)
+        time.sleep(delay)
 
 def sync(delay,command):
     t=threading.Thread(target=check_forever,args=(delay,command))
