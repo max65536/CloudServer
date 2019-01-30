@@ -164,7 +164,7 @@ def api_register(username,password):
 
     rootpath='./ClientFiles/'+username
     if not os.path.exists(rootpath):
-        os.mkdir(rootpath)
+        os.mkdirs(rootpath)
 
     print(resp.cookies[COOKIE_NAME])
     cookie_str=(resp.cookies[COOKIE_NAME])

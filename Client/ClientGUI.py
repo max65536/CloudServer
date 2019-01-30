@@ -16,15 +16,15 @@ def listwindow(username):
     windowlb.title('my windowlb')
     windowlb.geometry('400x600')
 
-    var1 = tk.StringVar()    #创建变量
-    var2 = tk.StringVar()    #创建变量
+    var1 = tk.StringVar()
+    var2 = tk.StringVar()
     l =tk.Label(windowlb,bg='white',width=30,textvariable=var1)
     l.pack()
     var1.set('welcome '+username)
 
     def print_selection():
-        value = lb.get(lb.curselection())   #获取当前选中的文本
-        var1.set(value)     #为label设置值
+        value = lb.get(lb.curselection())
+        var1.set(value)
 
     def add_items(path):
         global PATH
@@ -36,7 +36,7 @@ def listwindow(username):
         lb.insert('end', '..')
         lb.itemconfig(0,{'fg':'green'})
         for i in range(len(filelist)):
-            lb.insert('end', filelist[i])  #从最后一个位置开始加入值
+            lb.insert('end', filelist[i])
             if os.path.isdir(os.path.join(PATH,filelist[i])):
                 lb.itemconfig(i+1,{'fg':'green'})
             file_path=os.path.join(PATH,filelist[i])
@@ -112,18 +112,11 @@ def listwindow(username):
                   height=1, command=opendir)
     b1.pack()
 
-    #创建Listbox
 
-    lb = tk.Listbox(windowlb, width=50, height=20)  #将var2的值赋给Listbox
+    lb = tk.Listbox(windowlb, width=50, height=20)
 
     add_items(PATH)
-    #创建一个list并将值循环添加到Listbox控件中
 
-    # lb.itemconfig(1,{'bg':'yellow'})
-
-    # lb.insert(1, 'first')       #在第一个位置加入'first'字符
-    # lb.insert(2, 'second')      #在第二个位置加入'second'字符
-    # lb.delete(2)                #删除第二个位置的字符
     lb.pack()
 
     b_upload = tk.Button(windowlb, text='upload', width=30,
@@ -145,7 +138,6 @@ def listwindow(username):
     l2 =tk.Label(windowlb,bg='white',width=30,textvariable=var2)
     l2.pack()
 
-    #显示主窗口
     windowlb.mainloop()
 
 
