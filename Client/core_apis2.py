@@ -7,7 +7,7 @@ COOKIE_NAME='CloudServer'
 USERNAME='fff'
 # COOKIE={"CloudServer": "fff-1548694821-52bbae7526649fc6aeb7d80bdd4771717b37484e"}
 COOKIE=''
-HOST='http://95.169.20.170'
+HOST='http://95.169.20.170:8000'
 # HOST='http://127.0.0.1:9000'
 
 def get_filelist(username):
